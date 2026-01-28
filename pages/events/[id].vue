@@ -325,7 +325,7 @@ const hasSelectedTickets = computed(() => {
                   <v-select
                     v-model="selectedDateId"
                     :items="availableDates"
-                    item-title="starts_at"
+                    :item-title="(item) => formatDateTime(item.starts_at)"
                     item-value="id"
                     label="Fecha del evento"
                     density="comfortable"
