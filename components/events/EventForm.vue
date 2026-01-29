@@ -1,14 +1,6 @@
 <!-- components/EventForm.vue -->
 <script setup lang="ts">
-type EventStatus = 'upcoming' | 'on_sale' | 'sold_out' | 'cancelled' | 'finished'
-
-type EventFormModel = {
-  title: string
-  description: string | null
-  location: string
-  status: EventStatus | null
-  image_path?: string | null
-}
+import type { EventFormModel } from '~/types/form'
 
 const props = defineProps<{
   modelValue?: Partial<EventFormModel>

@@ -1,12 +1,5 @@
 <script setup lang="ts">
-type TicketStatus = 'available' | 'unavailable' | string
-
-type TicketCategoryFormModel = {
-  name: string
-  price: number | null
-  stock_total: number | null
-  status: TicketStatus | null
-}
+import type { TicketCategoryFormModel } from '~/types/form'
 
 const props = defineProps<{
   modelValue?: Partial<TicketCategoryFormModel>
@@ -16,6 +9,14 @@ const props = defineProps<{
 const emits = defineEmits<{
   (e: 'submit', payload: TicketCategoryFormModel): void
 }>()
+
+type TicketStatus = 'available' | 'sold_out' | 'disabled'
+
+const statusOptions = [
+  { label: 'Disponible', value: 'available' as TicketStatus },
+  { label: 'Agotado', value: 'sold_out' as TicketStatus },
+  { label: 'Deshabilitado', value: 'disabled' as TicketStatus },
+]
 
 const form = reactive<TicketCategoryFormModel>({
   name: props.modelValue?.name ?? '',
@@ -122,11 +123,15 @@ const handleSubmit = async () => {
         class="mb-3"
       />
 
-      <v-text-field
+      <v-select
         v-model="form.status"
-        label="Estado (opcional, defecto: available)"
+        label="Estado"
+        :items="statusOptions"
+        item-title="label"
+        item-value="value"
         variant="outlined"
         density="comfortable"
+        required
         class="mb-4"
       />
 

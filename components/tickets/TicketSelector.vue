@@ -1,13 +1,5 @@
 <script setup lang="ts">
-type TicketCategory = {
-  id: number
-  event_date_id: number
-  name: string
-  price: string
-  stock_total: number
-  stock_sold: number
-  status: string
-}
+import type { TicketCategory } from '~/types/eventDate'
 
 const props = defineProps<{
   ticketCategories: TicketCategory[]
@@ -55,7 +47,7 @@ const decrementQuantity = (categoryId: number) => {
             ${{ Number(cat.price).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
           </div>
         </div>
-        <div class="text-caption text-medium-emphasis">
+        <div v-if="cat.status === 'available'" class="text-caption text-medium-emphasis">
           {{ cat.stock_total - cat.stock_sold }} disponibles
         </div>
       </div>

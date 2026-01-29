@@ -1,11 +1,5 @@
 <script setup lang="ts">
-type EventDateStatus = 'scheduled' | 'finished' | 'cancelled'
-
-type EventDateFormModel = {
-  starts_at: string
-  ends_at: string | null
-  status: EventDateStatus | null
-}
+import type { EventDateFormModel, EventDateStatus } from '~/types/eventDate'
 
 const props = defineProps<{
   modelValue?: Partial<EventDateFormModel>

@@ -1,12 +1,9 @@
 <script setup lang="ts">
-type Option = {
-  label: string
-  value: string
-}
+import type { SearchOption } from '~/types/search'
 
 const props = defineProps<{
   modelValue: string[]         // array para múltiples tags
-  options: Option[]
+  options: SearchOption[]
   label?: string
 }>()
 

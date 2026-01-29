@@ -1,14 +1,5 @@
 <script setup lang="ts">
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type UserFormModel = {
-  name: string
-  email: string
-  password: string | null
-  password_confirmation: string | null
-  role: UserRole
-  is_active: boolean
-}
+import type { UserFormModel } from '~/types/form'
 
 const props = defineProps<{
   modelValue?: Partial<UserFormModel>
