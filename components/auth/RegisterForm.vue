@@ -64,9 +64,25 @@ const handleRegister = async () => {
       const errors = (error.value as any)?.data?.errors
       
       if (errors) {
-        // Si hay errores de validación del backend
-        const firstError = Object.values(errors)[0]
-        errorMessage.value = Array.isArray(firstError) ? firstError[0] : 'No se pudo completar el registro.'
+        // Mapear errores específicos del backend
+        if (errors.email) {
+          const emailError = Array.isArray(errors.email) ? errors.email[0] : errors.email
+          if (emailError.includes('unique')) {
+            errorMessage.value = 'Este correo ya está registrado. Intenta con otro o inicia sesión.'
+          } else {
+            errorMessage.value = emailError
+          }
+        } else if (errors.password) {
+          const passwordError = Array.isArray(errors.password) ? errors.password[0] : errors.password
+          errorMessage.value = passwordError
+        } else if (errors.name) {
+          const nameError = Array.isArray(errors.name) ? errors.name[0] : errors.name
+          errorMessage.value = nameError
+        } else {
+          // Cualquier otro error
+          const firstError = Object.values(errors)[0]
+          errorMessage.value = Array.isArray(firstError) ? firstError[0] : 'No se pudo completar el registro.'
+        }
       } else if (message) {
         errorMessage.value = message
       } else {

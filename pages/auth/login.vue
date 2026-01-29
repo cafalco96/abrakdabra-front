@@ -22,7 +22,7 @@ const handleSuccess = async () => {
 }
 
 definePageMeta({
-  layout: 'default', // usa tu layout público con navbar/hero si quieres
+  layout: 'default', // usa layout público con navbar/hero si quieres
 })
 </script>
 

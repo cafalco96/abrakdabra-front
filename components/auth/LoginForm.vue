@@ -46,12 +46,19 @@ const handleSubmit = async () => {
     })
     emits('success')
   } catch (err: any) {
-    // Nuxt useFetch error format
+    // Usamos el mensaje específico del backend si está disponible
+    const backendMessage = err?.data?.message
     const status = err?.status
-    const message = err?.data?.message
     
-    if (message === 'Debe verificar su correo.') {
+    if (backendMessage === 'Debe verificar su correo.') {
       emailVerificationMessage.value = 'Debes verificar tu correo electrónico. Revisa tu bandeja de entrada.'
+    } else if (backendMessage === 'Credenciales inválidas.') {
+      errorMessage.value = 'Credenciales inválidas. Revisa tu correo y contraseña.'
+    } else if (backendMessage === 'Usuario inactivo.') {
+      errorMessage.value = 'Tu cuenta ha sido desactivada. Contacta con soporte.'
+    } else if (backendMessage) {
+      // Cualquier otro mensaje del backend
+      errorMessage.value = backendMessage
     } else if (status === 422 || status === 401) {
       errorMessage.value = 'Credenciales inválidas. Revisa tu correo y contraseña.'
     } else {
