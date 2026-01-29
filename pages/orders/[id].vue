@@ -1,79 +1,15 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-
-type OrderStatus = 'pending_payment' | 'paid' | 'cancelled'
-
-type Ticket = {
-  id: number
-  order_item_id: number
-  ticket_category_id: number
-  code: string
-  qr_payload: string | null
-  status: string
-  issued_at: string
-  used_at: string | null
-}
-
-type OrderItem = {
-  id: number
-  order_id: number
-  ticket_category_id: number
-  quantity: number
-  unit_price: string
-  line_total: string
-  event_date_id: number
-  ticket_category_name_snapshot: string
-  ticket_category: {
-    id: number
-    event_date_id: number
-    name: string
-    price: string
-    stock_total: number
-    stock_sold: number
-    status: string
-    event_date: {
-      id: number
-      event_id: number
-      starts_at: string
-      ends_at: string | null
-      status: string
-      event: {
-        id: number
-        title: string
-        description: string | null
-        image_path: string | null
-        location: string | null
-        status: string
-        created_by: number
-      }
-    }
-  }
-  tickets?: Ticket[]
-}
-
-type Order = {
-  id: number
-  user_id: number
-  status: OrderStatus
-  subtotal: string
-  discount_total: string
-  tax_total: string
-  total: string
-  currency: string
-  stripe_session_id: string | null
-  stripe_payment_intent: string | null
-  created_at: string
-  updated_at: string
-  items: OrderItem[]
-}
+import QrcodeVue from 'qrcode.vue'
+import type { BuyerOrderDetail } from '~/types/api'
 
 const route = useRoute()
 const router = useRouter()
 
 const orderId = computed(() => Number(route.params.id))
 
-const { data, pending, error, refresh } = await useAuthApiFetch<Order>(`/orders/${orderId.value}`)
+const { data, pending, error, refresh } = await useAuthApiFetch<BuyerOrderDetail>(`/orders/${orderId.value}`)
 
 const order = computed(() => data.value ?? null)
 
@@ -375,9 +311,9 @@ const cancelOrder = async () => {
                     <th class="text-left">
                       Emitido
                     </th>
-                    <th class="text-left">
+                    <!-- <th class="text-left">
                       Usado
-                    </th>
+                    </th> -->
                   </tr>
                 </thead>
                 <tbody>
@@ -391,12 +327,25 @@ const cancelOrder = async () => {
                     <td class="text-body-2">
                       {{ formatDateTime(ticket.issued_at) }}
                     </td>
-                    <td class="text-body-2">
+                    <!-- <td class="text-body-2">
                       {{ ticket.used_at ? formatDateTime(ticket.used_at) : '-' }}
-                    </td>
+                    </td> -->
                   </tr>
                 </tbody>
               </v-table>
+
+              <!-- QR Codes centrados -->
+              <div class="d-flex flex-wrap justify-center ga-6 mt-6">
+                <div v-for="ticket in item.tickets" :key="`qr-${ticket.id}`" class="d-flex flex-column align-center ga-2">
+                  <QrcodeVue 
+                    :value="ticket.code" 
+                    size="120" 
+                    level="M" 
+                    render-as="svg"
+                  />
+                  
+                </div>
+              </div>
             </div>
           </div>
         </v-card-text>

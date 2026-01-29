@@ -1,24 +1,9 @@
 <script setup lang="ts">
-import FooterComponent from "~/components/FooterComponent.vue";
 import { useApiFetch } from "../composables/useApiFetch";
+import type { PublicEvent, PublicEventsResponse } from "~/types/event";
 
 // Usa un asset servido desde /public; ajusta el nombre al mover tu archivo.
 const heroBackground = '/videos/que-lloro.mp4'
-
-type PublicEvent = {
-  id: number;
-  title: string;
-  description?: string;
-  location?: string;
-  status?: string;
-  created_at?: string;
-};
-
-type PublicEventsResponse = {
-  data: PublicEvent[];
-  current_page?: number;
-  last_page?: number;
-};
 
 const { data, pending, error } = await useApiFetch<PublicEventsResponse>(
   "/public/events"

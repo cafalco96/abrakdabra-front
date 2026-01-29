@@ -1,34 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-
-type OrderItem = {
-  id: number
-  quantity: number
-  unit_price: string
-  line_total: string
-  ticket_category_name_snapshot: string
-  ticket_category: {
-    event_date: {
-      starts_at: string
-      event: {
-        title: string
-      }
-    }
-  }
-}
-
-type Order = {
-  id: number
-  status: string
-  subtotal: string
-  discount_total: string
-  tax_total: string
-  total: string
-  currency: string
-  discount_code_id: number | null
-  items: OrderItem[]
-}
+import type { CheckoutOrder } from '~/types/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -59,7 +32,7 @@ const fetchOrder = async () => {
   errorMessage.value = null
 
   try {
-    const { data, error } = await useAuthApiFetch<Order>(`/orders/${orderId.value}`)
+    const { data, error } = await useAuthApiFetch<CheckoutOrder>(`/orders/${orderId.value}`)
 
     if (error.value) {
       errorMessage.value = 'No se pudo cargar la orden.'

@@ -1,18 +1,10 @@
 <script setup lang="ts">
+import type { UserRole, AdminUser } from '~/types/user'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type AdminUser = {
-  id: number
-  name: string
-  email: string
-  role: UserRole
-  is_active: boolean
-}
 
 const route = useRoute()
 const router = useRouter()

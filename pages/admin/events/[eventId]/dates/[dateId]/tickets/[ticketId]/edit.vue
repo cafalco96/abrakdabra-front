@@ -1,20 +1,11 @@
 <script setup lang="ts">
+import type { TicketCategory } from '~/types/eventDate'
+import type { TicketCategoryFormModel } from '~/types/form'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-type TicketCategory = {
-  id: number
-  event_date_id: number
-  name: string
-  price: string
-  stock_total: number
-  stock_sold: number
-  status: string
-  created_at: string
-  updated_at: string
-}
 
 const route = useRoute()
 const router = useRouter()
@@ -29,13 +20,13 @@ const { data: ticketData, pending, error } = await useAuthApiFetch<TicketCategor
 
 const ticket = computed(() => ticketData.value ?? null)
 
-const handleSubmit = async (payload: any) => {
-  const body: any = {
+const handleSubmit = async (payload: TicketCategoryFormModel) => {
+  const body = {
     name: payload.name,
     price: payload.price,
     stock_total: payload.stock_total,
+    status: payload.status,
   }
-  if (payload.status) body.status = payload.status
 
   const { data, error } = await useAuthApiFetch(
     `/events/${eventId}/dates/${dateId}/ticket-categories/${ticketId}`,

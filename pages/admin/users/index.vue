@@ -1,22 +1,10 @@
 <script setup lang="ts">
-import SearchBar from '~/components/SearchBar.vue'
+import type { UserRole, AdminUser } from '~/types/user'
 
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin'], // solo administradores pueden ver esta página
 })
-
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type AdminUser = {
-  id: number
-  name: string
-  email: string
-  role: UserRole
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
 
 const router = useRouter()
 

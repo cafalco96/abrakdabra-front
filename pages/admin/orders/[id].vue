@@ -6,80 +6,19 @@ definePageMeta({
 
 import { useRoute } from 'vue-router'
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
+import QrcodeVue from 'qrcode.vue'
+import type { AdminOrderDetailed, AdminOrderTicket } from '~/types/api'
 
+type AdminOrder = AdminOrderDetailed
+type Ticket = AdminOrderTicket
 type OrderStatus = 'pending_payment' | 'paid' | 'cancelled'
-
-type Ticket = {
-  id: number
-  order_item_id: number
-  ticket_category_id: number
-  code: string
-  qr_payload: string | null
-  status: string
-  issued_at: string
-  used_at: string | null
-}
-
-type AdminOrderItem = {
-  id: number
-  order_id: number
-  ticket_category_id: number
-  quantity: number
-  unit_price: string
-  line_total: string
-  event_date_id: number
-  ticket_category_name_snapshot: string
-  ticket_category: {
-    id: number
-    name: string
-    event_date: {
-      starts_at: string
-      event: {
-        id: number
-        title: string
-      }
-    }
-  }
-  tickets?: Ticket[]
-}
-
-type AdminOrder = {
-  id: number
-  user_id: number
-  status: OrderStatus
-  subtotal: string
-  discount_total: string
-  tax_total: string
-  total: string
-  currency: string
-  stripe_session_id: string | null
-  stripe_payment_intent: string | null
-  created_at: string
-  updated_at: string
-  user: {
-    id: number
-    name: string
-    email: string
-  }
-  payment: {
-    id: number
-    provider: string
-    environment: string | null
-    stripe_payment_intent_id: string | null
-    status: string
-    amount: string
-    currency: string
-    paid_at: string | null
-  } | null
-  items: AdminOrderItem[]
-}
 
 const route = useRoute()
 const router = useRouter()
 
 const orderId = computed(() => Number(route.params.id))
 
-const { data, pending, error, refresh } = await useAuthApiFetch<AdminOrder>(
+const { data, pending, error, refresh } = await useAuthApiFetch<AdminOrderDetailed>(
   () => `/admin/orders/${orderId.value}`,
 )
 
@@ -121,6 +60,19 @@ const statusColor = (status: OrderStatus) => {
   }
 }
 
+const formatTicketStatus = (status: string) => {
+  switch (status) {
+    case 'issued':
+      return 'Emitido'
+    case 'used':
+      return 'Usado'
+    case 'voided':
+      return 'Anulado'
+    default:
+      return status
+  }
+}
+
 const goBack = () => {
   router.push('/admin/orders')
 }
@@ -135,7 +87,7 @@ const updateStatus = async (newStatus: OrderStatus) => {
   statusUpdateError.value = null
 
   try {
-    const { data: updated, error: updateError } = await useAuthApiFetch<AdminOrder>(
+    const { data: updated, error: updateError } = await useAuthApiFetch<AdminOrderDetailed>(
       `/admin/orders/${order.value.id}`,
       {
         method: 'PUT',
@@ -402,18 +354,30 @@ const updateStatus = async (newStatus: OrderStatus) => {
                       <th>Código</th>
                       <th>Estado</th>
                       <th>Emitido</th>
-                      <th>Usado</th>
+                      <!-- <th>Usado</th> -->
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="ticket in item.tickets" :key="ticket.id">
                       <td>{{ ticket.code }}</td>
-                      <td>{{ ticket.status }}</td>
+                      <td>{{ formatTicketStatus(ticket.status) }}</td>
                       <td>{{ formatDateTime(ticket.issued_at) }}</td>
-                      <td>{{ ticket.used_at ? formatDateTime(ticket.used_at) : '-' }}</td>
+                      <!-- <td>{{ ticket.used_at ? formatDateTime(ticket.used_at) : '-' }}</td> -->
                     </tr>
                   </tbody>
                 </v-table>
+
+                <!-- QR Codes centrados -->
+                <div class="d-flex flex-wrap justify-center ga-6 mt-6">
+                  <div v-for="ticket in item.tickets" :key="`qr-${ticket.id}`" class="d-flex flex-column align-center ga-2">
+                    <QrcodeVue 
+                      :value="ticket.code" 
+                      size="120" 
+                      level="M" 
+                      render-as="svg"
+                    />
+                  </div>
+                </div>
               </div>
             </template>
           </div>

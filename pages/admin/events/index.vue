@@ -1,36 +1,11 @@
 <script setup lang="ts">
 import { getEventStatusMeta } from '~/utils/eventStatus'
-import SearchBar from '~/components/SearchBar.vue'
+import type { AdminEvent } from '~/types/admin'
 
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-type AdminEvent = {
-  id: number
-  title: string
-  description?: string
-  location?: string
-  status?: string
-  image_path?: string
-  created_by?: number
-  created_at?: string
-  updated_at?: string
-  deleted_at?: string | null
-  creator?: {
-    id: number
-    name: string
-    email: string
-    role: string
-  }
-}
-
-type AdminEventsResponse = {
-  data: AdminEvent[]
-  current_page?: number
-  last_page?: number
-}
 
 const { data, pending, error } = await useAuthApiFetch<AdminEventsResponse>('/events')
 

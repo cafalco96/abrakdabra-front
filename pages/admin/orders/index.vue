@@ -1,55 +1,11 @@
 <script setup lang="ts">
-import SearchBar from '~/components/SearchBar.vue'
-import SearchTags from '~/components/SearchTags.vue'
-
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
 
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-
-type AdminOrderStatus = 'pending_payment' | 'paid' | 'cancelled'
-
-type AdminOrderItem = {
-  id: number
-  order_id: number
-  ticket_category_id: number
-  quantity: number
-  line_total: string
-  ticket_category: {
-    event_date: {
-      starts_at: string
-      event: {
-        title: string
-      }
-    }
-  }
-}
-
-type AdminOrder = {
-  id: number
-  user_id: number
-  status: AdminOrderStatus
-  total: string
-  currency: string
-  created_at: string
-  user: {
-    id: number
-    name: string
-    email: string
-  }
-  items: AdminOrderItem[]
-}
-
-type AdminOrdersPaginated = {
-  current_page: number
-  data: AdminOrder[]
-  last_page: number
-  next_page_url: string | null
-  prev_page_url: string | null
-  total: number
-}
+import type { AdminOrdersPaginated } from '~/types/api'
 
 const router = useRouter()
 

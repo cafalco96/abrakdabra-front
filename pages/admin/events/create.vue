@@ -1,21 +1,13 @@
 <!-- pages/admin/events/create.vue -->
 <script setup lang="ts">
+import type { EventFormModel } from '~/types/form'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
 
 const router = useRouter()
-
-type EventStatus = 'upcoming' | 'on_sale' | 'sold_out' | 'cancelled' | 'finished'
-
-type EventFormModel = {
-  title: string
-  description: string | null
-  location: string
-  status: EventStatus | null
-  image_path?: string | null
-}
 
 const handleCreate = async (payload: EventFormModel) => {
   const body: any = {

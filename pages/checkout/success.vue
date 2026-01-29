@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router'
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
 import { getOrderStatusMeta } from '~/utils/orderStatus'
+import type { CheckoutSuccessOrder } from '~/types/api'
 
 const route = useRoute()
 const router = useRouter()
@@ -15,12 +16,7 @@ const hasError = ref(false)
 const errorMessage = ref<string | null>(null)
 
 // Opcional: datos de la orden para mostrar resumen
-type Order = {
-  id: number
-  status: string
-  total: string
-  currency: string
-}
+type Order = CheckoutSuccessOrder
 const order = ref<Order | null>(null)
 const orderStatusMeta = computed(() => order.value ? getOrderStatusMeta(order.value.status) : null)
 

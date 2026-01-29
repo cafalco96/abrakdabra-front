@@ -1,20 +1,11 @@
 <script setup lang="ts">
+import { useAuth } from '~/composables/useAuth'
+import type { UserRole, MeUser } from '~/types/user'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-import { useAuth } from '~/composables/useAuth'
-
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type MeUser = {
-  id: number
-  name: string
-  email: string
-  role: UserRole
-  is_active: boolean
-}
 
 const router = useRouter()
 const { user: currentUser, fetchMe } = useAuth()

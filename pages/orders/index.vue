@@ -1,81 +1,12 @@
 <script setup lang="ts">
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-import SearchBar from '~/components/SearchBar.vue'
-import SearchTags from '~/components/SearchTags.vue'
-
-type OrderStatus = 'pending_payment' | 'paid' | 'cancelled'
-
-type OrderItem = {
-  id: number
-  order_id: number
-  ticket_category_id: number
-  quantity: number
-  unit_price: string
-  line_total: string
-  event_date_id: number
-  ticket_category_name_snapshot: string
-  ticket_category: {
-    id: number
-    event_date_id: number
-    name: string
-    price: string
-    stock_total: number
-    stock_sold: number
-    status: string
-    event_date: {
-      id: number
-      event_id: number
-      starts_at: string
-      ends_at: string | null
-      status: string
-      event: {
-        id: number
-        title: string
-        description: string | null
-        image_path: string | null
-        location: string | null
-        status: string
-        created_by: number
-      }
-    }
-  }
-}
-
-type Order = {
-  id: number
-  user_id: number
-  status: OrderStatus
-  subtotal: string
-  discount_total: string
-  tax_total: string
-  total: string
-  currency: string
-  stripe_session_id: string | null
-  stripe_payment_intent: string | null
-  created_at: string
-  updated_at: string
-  items: OrderItem[]
-}
-
-type PaginatedOrders = {
-  current_page: number
-  data: Order[]
-  first_page_url: string
-  from: number
-  last_page: number
-  last_page_url: string
-  next_page_url: string | null
-  prev_page_url: string | null
-  per_page: number
-  to: number
-  total: number
-}
+import type { PaginatedBuyerOrders } from '~/types/api'
 
 const router = useRouter()
 const page = ref(1)
 
 // fetch paginado
-const { data, pending, error, refresh } = await useAuthApiFetch<PaginatedOrders>('/orders', {
+const { data, pending, error, refresh } = await useAuthApiFetch<PaginatedBuyerOrders>('/orders', {
   query: computed(() => ({
     page: page.value,
   })),

@@ -1,42 +1,11 @@
 <script setup lang="ts">
 import { getEventStatusMeta } from '~/utils/eventStatus'
-import SearchBar from '~/components/SearchBar.vue'
+import type { EventStatus, Creator, AdminEventItem, EventsPaginated, DashboardStats } from '~/types/admin'
 
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-type EventStatus = 'upcoming' | 'on_sale' | 'sold_out' | 'cancelled' | 'finished'
-
-type Creator = {
-  id: number
-  name: string
-  email: string
-}
-
-type AdminEventItem = {
-  id: number
-  title: string
-  location: string
-  status: EventStatus
-  created_at: string
-  creator: Creator
-}
-
-type EventsPaginated = {
-  data: AdminEventItem[]
-  total: number
-}
-
-type DashboardStats = {
-  total_events: number
-  events_on_sale: number
-  tickets_sold_today: number
-  revenue_today: number
-  tickets_sold_total: number
-  revenue_total: number
-}
 
 // Fetch dashboard stats
 const { data: statsData } = await useAuthApiFetch<DashboardStats>('/admin/dashboard')

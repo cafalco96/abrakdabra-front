@@ -1,18 +1,10 @@
 <script setup lang="ts">
+import type { EventDate } from '~/types/eventDate'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-type EventDate = {
-  id: number
-  event_id: number
-  starts_at: string
-  ends_at: string | null
-  status: string
-  created_at: string
-  updated_at: string
-}
 
 const route = useRoute()
 const eventId = route.params.eventId as string

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { EventFormModel } from '~/types/form'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
@@ -7,16 +9,6 @@ definePageMeta({
 const router = useRouter()
 const route = useRoute()
 const eventId = route.params.eventId as string
-
-type EventStatus = 'upcoming' | 'on_sale' | 'sold_out' | 'cancelled' | 'finished'
-
-type EventFormModel = {
-  title: string
-  description: string | null
-  location: string
-  status: EventStatus | null
-  image_path?: string | null
-}
 
 const {
   data: eventData,

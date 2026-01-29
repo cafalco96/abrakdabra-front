@@ -1,23 +1,11 @@
 <script setup lang="ts">
+import type { DiscountCode } from '~/types/discount'
+import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
-
-import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-
-type DiscountCode = {
-  id: number
-  code: string
-  type: 'percentage' | 'fixed'
-  value: string
-  is_active: boolean
-  starts_at: string | null
-  ends_at: string | null
-  max_uses: number | null
-  used_count: number
-  created_at: string
-}
 
 const codes = ref<DiscountCode[]>([])
 const loading = ref(false)

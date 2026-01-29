@@ -1,23 +1,7 @@
 <script setup lang="ts">
 import { useAuth } from '~/composables/useAuth'
 import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
-
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type BuyerUser = {
-  id: number
-  name: string
-  email: string
-  role: UserRole
-  is_active: boolean
-}
-
-type UserFormPayload = {
-  name: string
-  email: string
-  password?: string
-  password_confirmation?: string
-}
+import type { UserRole, BuyerUser, UserFormPayload } from '~/types/user'
 
 definePageMeta({
   middleware: ['auth'],

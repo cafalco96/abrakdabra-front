@@ -1,81 +1,22 @@
 <script setup lang="ts">
 import { getEventStatusMeta } from '~/utils/eventStatus'
-import EventCategoryChart from '~/components/EventCategoryChart.vue'
-import EventSalesPerDayChart from '~/components/EventSalesPerDayChart.vue'
+import { getEventDateStatusMeta } from '~/utils/eventDateStatus'
+import type {
+  AdminEventDateStatus,
+  AdminEventStats,
+  AdminEventTicketCategory,
+  AdminEventDateItem,
+  AdminEventBase,
+} from '~/types/api'
 
 definePageMeta({
   layout: 'admin',
   middleware: ['role-admin-gestor'],
 })
 
-type EventDateStatus = 'scheduled' | 'on_sale' | 'finished' | 'cancelled'
-
-type PerCategoryStat = {
-  category_id: number
-  name: string
-  tickets_sold: string
-  revenue: string
-}
-
-type PerDayStat = {
-  date: string
-  tickets_sold: string
-  revenue: string
-}
-
-type EventStats = {
-  per_category: PerCategoryStat[]
-  per_day: PerDayStat[]
-}
-
-type TicketCategory = {
-  id: number
-  event_date_id: number
-  name: string
-  price: string
-  stock_total: number
-  stock_sold: number
-  status: string
-  created_at: string
-  updated_at: string
-}
-
-type EventDate = {
-  id: number
-  event_id: number
-  starts_at: string
-  ends_at: string
-  status: string
-  created_at: string
-  updated_at: string
-}
-
-type UserRole = 'admin' | 'gestor' | 'buyer'
-
-type Creator = {
-  id: number
-  name: string
-  email: string
-  email_verified_at: string | null
-  role: UserRole
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-type AdminEventBase = {
-  id: number
-  title: string
-  description: string
-  location: string
-  status: string
-  image_path?: string
-  created_by: number
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-  creator: Creator
-}
+// Type aliases for internal use
+type TicketCategory = AdminEventTicketCategory
+type EventDate = AdminEventDateItem
 
 const route = useRoute()
 const id = route.params.id as string
@@ -102,12 +43,21 @@ const {
   data: statsData,
   pending: pendingStats,
   error: errorStats,
-} = await useAuthApiFetch<EventStats>(`/events/${id}/stats`)
+} = await useAuthApiFetch<AdminEventStats>(`/events/${id}/stats`)
 
 const stats = computed(() => statsData.value ?? { per_category: [], per_day: [] })
 
 const formatMoney = (val: string | number) =>
   Number(val).toLocaleString(undefined, { minimumFractionDigits: 2 })
+
+const formatTicketStatus = (status: string) => {
+  const statusMap: Record<string, string> = {
+    'available': 'Disponible',
+    'sold_out': 'Agotado',
+    'disabled': 'Deshabilitado',
+  }
+  return statusMap[status] || status
+}
 
 // categorías por fecha
 const categoriesByDate = ref<Record<number, TicketCategory[]>>({})
@@ -429,7 +379,7 @@ onMounted(async () => {
                   <div class="d-flex flex-column">
                     <span>{{ formatDateTime(date.starts_at) }}</span>
                     <span class="text-caption text-medium-emphasis">
-                      Estado: {{ date.status }}
+                      Estado: {{ getEventDateStatusMeta(date.status).label }}
                     </span>
                   </div>
 
@@ -496,7 +446,7 @@ onMounted(async () => {
                             <td>${{ cat.price }}</td>
                             <td>{{ cat.stock_total }}</td>
                             <td>{{ cat.stock_sold }}</td>
-                            <td>{{ cat.status }}</td>
+                            <td>{{ formatTicketStatus(cat.status) }}</td>
                             <td class="text-right">
                               <v-btn
                                 icon="mdi-pencil"

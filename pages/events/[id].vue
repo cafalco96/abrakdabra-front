@@ -3,43 +3,12 @@ import { useRoute } from 'vue-router'
 import { useApiFetch } from '~/composables/useApiFetch'
 import { getEventStatusMeta } from '~/utils/eventStatus'
 import { getEventDateStatusMeta } from '~/utils/eventDateStatus'
-import TicketSelector from '~/components/TicketSelector.vue'
-
-type TicketCategory = {
-  id: number
-  event_date_id: number
-  name: string
-  price: string
-  stock_total: number
-  stock_sold: number
-  status: string
-}
-
-type EventDate = {
-  id: number
-  event_id: number
-  starts_at: string
-  ends_at: string | null
-  status: string
-  ticket_categories: TicketCategory[]
-}
-
-type PublicEvent = {
-  id: number
-  title: string
-  description: string | null
-  image_path: string | null
-  location: string | null
-  status: 'upcoming' | 'on_sale' | 'sold_out' | 'cancelled' | 'finished'
-  created_at: string
-  updated_at: string
-  dates: EventDate[]
-}
+import type { PublicEventDetail, PublicEventDate } from '~/types/api'
 
 const route = useRoute()
 const eventId = computed(() => route.params.id)
 
-const { data, pending, error } = await useApiFetch<PublicEvent>(
+const { data, pending, error } = await useApiFetch<PublicEventDetail>(
   `/public/events/${eventId.value}`,
 )
 
@@ -62,10 +31,16 @@ const additionalDatesCount = computed(() => {
 const formatDateTime = (iso: string) => {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
-  return d.toLocaleString([], {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+
+  const pad = (n: number) => n.toString().padStart(2, '0')
+
+  const yyyy = d.getUTCFullYear()
+  const mm = pad(d.getUTCMonth() + 1)
+  const dd = pad(d.getUTCDate())
+  const hh = pad(d.getUTCHours())
+  const mi = pad(d.getUTCMinutes())
+
+  return `${dd}/${mm}/${yyyy} ${hh}:${mi}`
 }
 
 const heroImage = computed(() =>
@@ -325,22 +300,21 @@ const hasSelectedTickets = computed(() => {
                   <v-select
                     v-model="selectedDateId"
                     :items="availableDates"
-                    :item-title="(item) => formatDateTime(item.starts_at)"
                     item-value="id"
                     label="Fecha del evento"
                     density="comfortable"
                   >
                     <template #selection="{ item }">
-                      <span>{{ formatDateTime(item.raw.starts_at) }}</span>
+                      {{ formatDateTime(item.raw.starts_at) }}
                     </template>
                     <template #item="{ item, props }">
                       <v-list-item v-bind="props">
-                        <v-list-item-title>
+                        <template #title>
                           {{ formatDateTime(item.raw.starts_at) }}
-                        </v-list-item-title>
-                        <v-list-item-subtitle>
+                        </template>
+                        <template #subtitle>
                           {{ getEventDateStatusMeta(item.raw.status).label }}
-                        </v-list-item-subtitle>
+                        </template>
                       </v-list-item>
                     </template>
                   </v-select>
