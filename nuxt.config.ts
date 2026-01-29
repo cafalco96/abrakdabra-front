@@ -11,6 +11,13 @@ export default defineNuxtConfig({
 
   modules: ['vuetify-nuxt-module'],
 
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
+
   vuetify: {
     vuetifyOptions: {
       theme: {
