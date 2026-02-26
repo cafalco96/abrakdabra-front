@@ -47,7 +47,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: 'http://localhost:8000/api', // Laravel api.php
+            apiBase: process.env.NUXT_PUBLIC_API_BASE || 'https://abrakdabra-back.onrender.com/api',
     },
   },
 
