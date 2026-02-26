@@ -42,6 +42,8 @@ const formatDateTime = (iso: string) => {
   })
 }
 
+type AdminOrderStatus = 'pending_payment' | 'paid' | 'cancelled'
+
 const formatStatus = (status: AdminOrderStatus) => {
   switch (status) {
     case 'pending_payment':
@@ -68,6 +70,14 @@ const statusColor = (status: AdminOrderStatus) => {
   }
 }
 
+const getEventTitle = (order: any) => {
+  return order?.items?.[0]?.ticket_category?.event_date?.event?.title ?? 'Evento'
+}
+
+const getEventDate = (order: any) => {
+  return order?.items?.[0]?.ticket_category?.event_date?.starts_at ?? null
+}
+
 const changePage = async (newPage: number) => {
   if (!paginator.value) return
   if (newPage < 1 || newPage > paginator.value.last_page) return
@@ -87,7 +97,7 @@ const clearFilters = async () => {
   await refresh()
 }
 
-const goToOrder = (order: AdminOrder) => {
+const goToOrder = (order: any) => {
   router.push(`/admin/orders/${order.id}`)
 }
 </script>
@@ -95,7 +105,7 @@ const goToOrder = (order: AdminOrder) => {
 <template>
   <v-container class="py-8" max-width="1100">
     <h1 class="text-h5 mb-4">
-      Órdenes
+      Ordenes
     </h1>
 
     <!-- Filtros -->
@@ -125,19 +135,16 @@ const goToOrder = (order: AdminOrder) => {
     <div v-if="pending" class="d-flex justify-center my-10">
       <v-progress-circular indeterminate color="primary" />
     </div>
-
     <div v-else-if="error">
       <v-alert type="error" variant="tonal">
-        No se pudieron cargar las órdenes.
+        No se pudieron cargar las ordenes.
       </v-alert>
     </div>
-
     <div v-else-if="!orders.length">
       <v-alert type="info" variant="tonal">
-        No hay órdenes que coincidan con los filtros.
+        No hay ordenes que coincidan con los filtros.
       </v-alert>
     </div>
-
     <div v-else>
       <v-card variant="flat">
         <v-table density="comfortable">
@@ -165,21 +172,21 @@ const goToOrder = (order: AdminOrder) => {
               </td>
               <td>
                 <div class="text-body-2">
-                  {{ order.user.name }}
+                  {{ order.user?.name ?? '-' }}
                 </div>
                 <div class="text-caption text-medium-emphasis">
-                  {{ order.user.email }}
+                  {{ order.user?.email ?? '-' }}
                 </div>
               </td>
               <td>
                 <div class="text-body-2">
-                  {{ order.items[0]?.ticket_category.event_date.event.title || 'Evento' }}
+                  {{ getEventTitle(order) }}
                 </div>
                 <div
-                  v-if="order.items[0]"
+                  v-if="getEventDate(order)"
                   class="text-caption text-medium-emphasis"
                 >
-                  {{ formatDateTime(order.items[0].ticket_category.event_date.starts_at) }}
+                  {{ formatDateTime(getEventDate(order)) }}
                 </div>
               </td>
               <td>
@@ -217,8 +224,8 @@ const goToOrder = (order: AdminOrder) => {
         class="d-flex justify-space-between align-center mt-4"
       >
         <div class="text-caption text-medium-emphasis">
-          Página {{ paginator.current_page }} de {{ paginator.last_page }} ·
-          {{ paginator.total }} órdenes
+          Pagina {{ paginator.current_page }} de {{ paginator.last_page }} ·
+          {{ paginator.total }} ordenes
         </div>
         <div class="d-flex ga-2">
           <v-btn
