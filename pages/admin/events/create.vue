@@ -8,6 +8,7 @@ definePageMeta({
 })
 
 const router = useRouter()
+const authApi = useAuthApi()
 
 const handleCreate = async (payload: EventFormModel) => {
   const body: any = {
@@ -26,20 +27,16 @@ const handleCreate = async (payload: EventFormModel) => {
     body.image_path = payload.image_path
   }
 
-  const { data, error } = await useAuthApiFetch(`/events`, {
-    method: 'POST',
-    body,
-  })
-
-  if (error.value) {
-    // aquí luego puedes mapear errores 422 al formulario
-    console.error('Error al crear evento', error.value)
-    return
-  }
-
-  const created = data.value as any
-  if (created?.id) {
-    router.push(`/admin/events/${created.id}`)
+  try {
+    const created = await authApi<any>('/events', {
+      method: 'POST',
+      body,
+    })
+    if (created?.id) {
+      router.push(`/admin/events/${created.id}`)
+    }
+  } catch (err) {
+    console.error('Error al crear evento', err)
   }
 }
 </script>
@@ -47,7 +44,6 @@ const handleCreate = async (payload: EventFormModel) => {
 <template>
   <div>
     <h1 class="text-h5 mb-4">Nuevo evento</h1>
-
     <EventForm
       submit-label="Crear evento"
       @submit="handleCreate"
