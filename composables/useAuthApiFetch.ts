@@ -1,3 +1,4 @@
+// useFetch wrapper: para data fetching reactivo en setup context
 export const useAuthApiFetch = <T>(path: string | (() => string), options: any = {}) => {
   const config = useRuntimeConfig()
   const { token } = useAuth()
@@ -17,4 +18,21 @@ export const useAuthApiFetch = <T>(path: string | (() => string), options: any =
     },
     ...options,
   })
+}
+
+// $fetch wrapper: para mutaciones imperativas (POST, PUT, DELETE) desde event handlers
+export const useAuthApi = () => {
+  const config = useRuntimeConfig()
+  const { token } = useAuth()
+
+  return <T = any>(path: string, options: any = {}): Promise<T> => {
+    return $fetch<T>(path, {
+      baseURL: config.public.apiBase,
+      headers: {
+        ...(options.headers || {}),
+        ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
+      },
+      ...options,
+    })
+  }
 }
