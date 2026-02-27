@@ -138,7 +138,7 @@ const handleProceedToPayment = async () => {
                   {{ item.ticket_category?.event_date?.event?.title }}
                 </v-list-item-title>
                 <v-list-item-subtitle>
-                  {{ item.ticket_category?.event_date?.starts_at ? new Date(item.ticket_category.event_date.starts_at).toLocaleString() : '' }}
+                  {{ item.ticket_category?.event_date?.starts_at ? new Date(item.ticket_category.event_date.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '' }}
                   &middot; Cantidad: {{ item.quantity }}
                 </v-list-item-subtitle>
                 <template #append>
@@ -162,7 +162,7 @@ const handleProceedToPayment = async () => {
                 <v-text-field
                   v-model="couponCode"
                   label="Codigo"
-                  placeholder="ABRA10"
+                  
                   hide-details="auto"
                   density="comfortable"
                 />
