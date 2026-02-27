@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
   Chart as ChartJS,
+  LineController,
+  BarController,
   BarElement,
   LineElement,
   CategoryScale,
@@ -10,9 +12,11 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
-import { Bar } from 'vue-chartjs'
+import { Chart } from 'vue-chartjs'
 
 ChartJS.register(
+  LineController,
+  BarController,
   CategoryScale,
   LinearScale,
   BarElement,
@@ -182,6 +186,6 @@ const chartOptions = {
 
 <template>
   <div style="height: 300px;">
-    <Bar :data="chartData" :options="chartOptions" />
+    <Chart type="bar" :data="chartData" :options="chartOptions" />
   </div>
 </template>
