@@ -4,6 +4,7 @@ import { getEventStatusMeta } from '~/utils/eventStatus'
 const props = defineProps<{
   event: {
     id: number
+    slug?: string
     title: string
     description?: string
     location?: string
@@ -19,7 +20,7 @@ const eventImage = computed(() =>
 </script>
 
 <template>
-  <router-link :to="`/events/${event.id}`" class="event-tile-link">
+  <router-link :to="`/events/${event.slug || event.id}`" class="event-tile-link">
     <v-card class="h-100">
       <v-img
         :src="eventImage"
@@ -29,7 +30,7 @@ const eventImage = computed(() =>
       />
       <v-card-title>{{ event.title }}</v-card-title>
       <v-card-subtitle>
-        {{ event.location || "Ubicación por definir" }}
+        {{ event.location || "Ubicacion por definir" }}
         <span v-if="event.status"> · {{ getEventStatusMeta(event.status).label }}</span>
       </v-card-subtitle>
       <v-card-subtitle
@@ -38,14 +39,6 @@ const eventImage = computed(() =>
       >
         Publicado {{ new Date(event.created_at).toLocaleDateString() }}
       </v-card-subtitle>
-      <v-card-text>
-        {{ event.description || "Próximamente más detalles." }}
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" size="small">
-          Ver detalles
-        </v-btn>
-      </v-card-actions>
     </v-card>
   </router-link>
 </template>
