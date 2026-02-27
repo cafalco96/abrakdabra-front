@@ -7,13 +7,14 @@ const route = useRoute()
 const router = useRouter()
 const orderId = computed(() => Number(route.query.order_id))
 
-const order = ref<Order | null>(null)
+const order = ref<CheckoutOrder | null>(null)
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 
 const couponCode = ref('')
 const applyingCoupon = ref(false)
 const couponMessage = ref<string | null>(null)
+const couponSuccess = ref(false)
 const isCreatingCheckout = ref(false)
 
 const authApi = useAuthApi()
@@ -48,31 +49,31 @@ const handleApplyCoupon = async () => {
   if (!order.value) return
   if (!couponCode.value.trim()) {
     couponMessage.value = 'Ingresa un codigo.'
+    couponSuccess.value = false
     return
   }
-
   applyingCoupon.value = true
   couponMessage.value = null
+  couponSuccess.value = false
   errorMessage.value = null
-
   try {
-    const updated = await authApi<Order>(
+    const updated = await authApi<CheckoutOrder>(
       `/orders/${order.value.id}/apply-discount`,
       {
         method: 'POST',
-        body: { code: couponCode.value.trim() },
+        body: { code: couponCode.value.trim().toUpperCase() },
       },
     )
     order.value = updated
     couponMessage.value = 'Codigo aplicado correctamente.'
+    couponSuccess.value = true
     couponCode.value = ''
   } catch (err: any) {
-    const status = err?.response?.status || err?.statusCode
+    couponSuccess.value = false
+    const status = err?.response?.status || err?.statusCode || err?.status
+    const message = err?.data?.message || err?.response?._data?.message || err?.message
     if (status === 422) {
-      couponMessage.value =
-        err?.data?.message ||
-        err?.message ||
-        'Codigo invalido o no aplicable.'
+      couponMessage.value = message || 'Codigo invalido o no aplicable.'
     } else if (status === 403) {
       couponMessage.value = 'No autorizado para aplicar este codigo.'
     } else {
@@ -95,7 +96,7 @@ const handleProceedToPayment = async () => {
     const url = result?.checkout_url
     if (url) window.location.href = url
   } catch (err: any) {
-    errorMessage.value = 'No se pudo iniciar el pago.'
+    errorMessage.value = 'No se pudo iniciar el pago. Intenta nuevamente.'
   } finally {
     isCreatingCheckout.value = false
   }
@@ -103,86 +104,102 @@ const handleProceedToPayment = async () => {
 </script>
 
 <template>
-  <v-container class="py-6" max-width="900">
-    <h1 class="text-h5 mb-4">
-      Resumen de compra
-    </h1>
-
-    <v-alert
-      v-if="errorMessage"
-      type="error"
-      variant="tonal"
-      class="mb-4"
-    >
-      {{ errorMessage }}
-    </v-alert>
-
+  <v-container class="py-8" max-width="700">
     <div v-if="loading" class="d-flex justify-center py-10">
       <v-progress-circular indeterminate color="primary" />
     </div>
+    <div v-else-if="errorMessage && !order">
+      <v-alert type="error" variant="tonal">
+        {{ errorMessage }}
+      </v-alert>
+    </div>
+    <div v-else-if="!order">
+      <v-alert type="warning" variant="tonal">
+        Orden no encontrada.
+      </v-alert>
+    </div>
+    <div v-else>
+      <h1 class="text-h5 mb-6">
+        Resumen de tu orden
+      </h1>
 
-    <div v-else-if="order">
-      <v-row dense>
-        <v-col cols="12" md="8">
-          <v-card class="mb-4">
+      <v-alert
+        v-if="errorMessage"
+        type="error"
+        variant="tonal"
+        class="mb-4"
+      >
+        {{ errorMessage }}
+      </v-alert>
+
+      <v-row>
+        <!-- Items de la orden -->
+        <v-col cols="12" md="7">
+          <v-card variant="flat" class="mb-4">
             <v-card-title>Entradas</v-card-title>
-            <v-divider />
-            <v-list>
-              <v-list-item
+            <v-card-text>
+              <div
                 v-for="item in order.items"
                 :key="item.id"
+                class="d-flex justify-space-between align-center mb-2"
               >
-                <v-list-item-title>
-                  {{ item.ticket_category_name_snapshot }}
-                  &middot;
-                  {{ item.ticket_category?.event_date?.event?.title }}
-                </v-list-item-title>
-                <v-list-item-subtitle>
-                  {{ item.ticket_category?.event_date?.starts_at ? new Date(item.ticket_category.event_date.starts_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '' }}
-                  &middot; Cantidad: {{ item.quantity }}
-                </v-list-item-subtitle>
-                <template #append>
-                  <div class="text-right">
-                    <div class="text-body-2">
-                      {{ formatMoney(item.unit_price) }} {{ order.currency }}
-                    </div>
-                    <div class="text-body-2 font-weight-medium">
-                      {{ formatMoney(item.line_total) }} {{ order.currency }}
-                    </div>
+                <div>
+                  <div class="text-body-2 font-weight-medium">
+                    {{ item.ticket_category_name_snapshot }}
                   </div>
-                </template>
-              </v-list-item>
-            </v-list>
+                  <div class="text-caption text-medium-emphasis">
+                    {{ item.quantity }} x ${{ formatMoney(item.unit_price) }}
+                  </div>
+                </div>
+                <span class="text-body-2">
+                  ${{ formatMoney(item.line_total) }}
+                </span>
+              </div>
+            </v-card-text>
           </v-card>
 
-          <v-card>
+          <!-- Cupon de descuento -->
+          <v-card variant="flat" class="mb-4">
             <v-card-title>Codigo de descuento</v-card-title>
             <v-card-text>
-              <div class="d-flex ga-2">
+              <div
+                v-if="order.discount_code_id"
+                class="text-body-2 text-success"
+              >
+                Descuento aplicado correctamente.
+              </div>
+              <div v-else>
                 <v-text-field
                   v-model="couponCode"
                   label="Codigo"
-                  
-                  hide-details="auto"
                   density="comfortable"
+                  variant="outlined"
+                  :disabled="applyingCoupon"
+                  @keyup.enter="handleApplyCoupon"
                 />
                 <v-btn
-                  color="primary"
+                  color="secondary"
                   :loading="applyingCoupon"
+                  :disabled="!couponCode.trim()"
                   @click="handleApplyCoupon"
                 >
                   Aplicar
                 </v-btn>
               </div>
-              <div v-if="couponMessage" class="text-caption mt-1">
+              <div
+                v-if="couponMessage"
+                class="mt-2 text-body-2"
+                :class="couponSuccess ? 'text-success' : 'text-error'"
+              >
                 {{ couponMessage }}
               </div>
             </v-card-text>
           </v-card>
         </v-col>
 
-        <v-col cols="12" md="4">
-          <v-card>
+        <!-- Resumen de precios -->
+        <v-col cols="12" md="5">
+          <v-card variant="flat">
             <v-card-title>Resumen</v-card-title>
             <v-card-text>
               <div class="d-flex justify-space-between mb-1">
