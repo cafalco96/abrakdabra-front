@@ -2,7 +2,7 @@
 // These types are specific to API responses and used across multiple pages
 
 // ============================================================================
-// PUBLIC EVENT PAGES (pages/events/[id].vue)
+// PUBLIC EVENT PAGES (pages/events/[slug].vue)
 // ============================================================================
 
 export type PublicEventTicketCategory = {
@@ -26,6 +26,7 @@ export type PublicEventDate = {
 
 export type PublicEventDetail = {
   id: number
+  slug: string
   title: string
   description: string | null
   image_path: string | null
