@@ -3,7 +3,15 @@ import { useAuthApiFetch } from '~/composables/useAuthApiFetch'
 import type { PaginatedBuyerOrders } from '~/types/api'
 
 const router = useRouter()
+const { user } = useAuth()
 const page = ref(1)
+
+// Redirigir admin al panel de ordenes administrativas
+onMounted(() => {
+  if (user.value?.role === 'admin') {
+    router.replace('/admin/orders')
+  }
+})
 
 // fetch paginado
 const { data, pending, error, refresh } = await useAuthApiFetch<PaginatedBuyerOrders>('/orders', {
@@ -15,7 +23,8 @@ const { data, pending, error, refresh } = await useAuthApiFetch<PaginatedBuyerOr
 const orders = computed(() => data.value?.data ?? [])
 const paginator = computed(() => data.value)
 
-const formatDateTime = (iso: string) => {
+const formatDateTime = (iso: string | null | undefined) => {
+  if (!iso) return ''
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return ''
   return d.toLocaleString([], {
@@ -53,7 +62,6 @@ const statusColor = (status: OrderStatus) => {
 // Filtros
 const eventNameFilter = ref('')
 const statusFilter = ref<string[]>([])
-
 const statusOptions = [
   { label: 'Pendiente de pago', value: 'pending_payment' },
   { label: 'Pagada', value: 'paid' },
@@ -62,22 +70,19 @@ const statusOptions = [
 
 const filteredOrders = computed(() => {
   let result = orders.value
-
   // Filtrar por nombre del evento
   const eventTerm = eventNameFilter.value.toLowerCase().trim()
   if (eventTerm) {
     result = result.filter(order =>
       order.items.some(item =>
-        item.ticket_category.event_date.event.title.toLowerCase().includes(eventTerm)
+        (item.ticket_category?.event_date?.event?.title ?? '').toLowerCase().includes(eventTerm)
       )
     )
   }
-
   // Filtrar por estado
   if (statusFilter.value.length > 0) {
     result = result.filter(order => statusFilter.value.includes(order.status))
   }
-
   return result
 })
 
@@ -96,7 +101,7 @@ const changePage = async (newPage: number) => {
 <template>
   <v-container class="py-8" max-width="900">
     <h1 class="text-h4 mb-4">
-      Mis órdenes
+      Mis ordenes
     </h1>
 
     <div v-if="pending" class="d-flex justify-center my-10">
@@ -105,13 +110,13 @@ const changePage = async (newPage: number) => {
 
     <div v-else-if="error">
       <v-alert type="error" variant="tonal">
-        No se pudieron cargar tus órdenes.
+        No se pudieron cargar tus ordenes.
       </v-alert>
     </div>
 
     <div v-else-if="!orders.length">
       <v-alert type="info" variant="tonal">
-        Aún no tienes órdenes registradas.
+        Aun no tienes ordenes registradas.
       </v-alert>
     </div>
 
@@ -160,19 +165,17 @@ const changePage = async (newPage: number) => {
                   {{ formatDateTime(order.created_at) }}
                 </div>
               </td>
-
               <td>
                 <div class="text-body-2">
-                  {{ order.items[0]?.ticket_category.event_date.event.title || 'Evento' }}
+                  {{ order.items[0]?.ticket_category?.event_date?.event?.title || 'Evento' }}
                 </div>
                 <div
-                  v-if="order.items[0]"
+                  v-if="order.items[0]?.ticket_category?.event_date?.starts_at"
                   class="text-caption text-medium-emphasis"
                 >
                   {{ formatDateTime(order.items[0].ticket_category.event_date.starts_at) }}
                 </div>
               </td>
-
               <td>
                 <v-chip
                   :color="statusColor(order.status)"
@@ -182,14 +185,12 @@ const changePage = async (newPage: number) => {
                   {{ formatStatus(order.status) }}
                 </v-chip>
               </td>
-
               <td>
                 <div class="text-body-2">
                   {{ Number(order.total).toLocaleString(undefined, { minimumFractionDigits: 2 }) }}
                   {{ order.currency }}
                 </div>
               </td>
-
               <td class="text-right">
                 <v-btn
                   size="small"
@@ -210,8 +211,8 @@ const changePage = async (newPage: number) => {
         class="d-flex justify-space-between align-center mt-4"
       >
         <div class="text-caption text-medium-emphasis">
-          Página {{ paginator.current_page }} de {{ paginator.last_page }} ·
-          {{ paginator.total }} órdenes
+          Pagina {{ paginator.current_page }} de {{ paginator.last_page }} &middot;
+          {{ paginator.total }} ordenes
         </div>
         <div class="d-flex ga-2">
           <v-btn
