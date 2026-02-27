@@ -227,7 +227,7 @@ const hasSelectedTickets = computed(() => {
           <v-col cols="12" md="8">
             <v-card variant="flat" class="mb-4">
               <v-card-title>Descripcion</v-card-title>
-              <v-card-text class="text-body-2">
+              <v-card-text class="text-body-2" style="white-space: pre-wrap;">
                 {{ event.description || 'Proximamente mas detalles.' }}
               </v-card-text>
             </v-card>
