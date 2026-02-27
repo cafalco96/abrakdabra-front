@@ -164,27 +164,33 @@ const handleProceedToPayment = async () => {
             <v-card-text>
               <div
                 v-if="order.discount_code_id"
-                class="text-body-2 text-success"
+                class="text-body-2 text-success d-flex align-center ga-2"
               >
+                <v-icon size="small">mdi-check-circle</v-icon>
                 Descuento aplicado correctamente.
               </div>
               <div v-else>
-                <v-text-field
-                  v-model="couponCode"
-                  label="Codigo"
-                  density="comfortable"
-                  variant="outlined"
-                  :disabled="applyingCoupon"
-                  @keyup.enter="handleApplyCoupon"
-                />
-                <v-btn
-                  color="secondary"
-                  :loading="applyingCoupon"
-                  :disabled="!couponCode.trim()"
-                  @click="handleApplyCoupon"
-                >
-                  Aplicar
-                </v-btn>
+                <div class="d-flex ga-2 align-start">
+                  <v-text-field
+                    v-model="couponCode"
+                    label="Codigo"
+                    density="comfortable"
+                    variant="outlined"
+                    :disabled="applyingCoupon"
+                    hide-details
+                    class="flex-grow-1"
+                    @keyup.enter="handleApplyCoupon"
+                  />
+                  <v-btn
+                    variant="outlined"
+                    :loading="applyingCoupon"
+                    :disabled="!couponCode.trim()"
+                    class="mt-1"
+                    @click="handleApplyCoupon"
+                  >
+                    Aplicar
+                  </v-btn>
+                </div>
               </div>
               <div
                 v-if="couponMessage"
